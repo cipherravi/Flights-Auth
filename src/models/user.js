@@ -15,15 +15,14 @@ module.exports = (sequelize, DataTypes) => {
     {
       fullName: { type: DataTypes.STRING, allowNull: false },
       email: {
-        type: DataTypes.string,
+        type: DataTypes.STRING,
         allowNull: false,
         unique: true,
         validate: {
           isEmail: true,
-          is,
         },
       },
-      passwordHash: { type: DataTypes.CHAR(36), allowNull: false },
+      passwordHash: { type: DataTypes.STRING, allowNull: false },
       phone: { type: DataTypes.BIGINT, allowNull: false, unique: true },
       isVerified: {
         type: DataTypes.BOOLEAN,

@@ -19,7 +19,7 @@ module.exports = {
         unique: true,
       },
       passwordHash: {
-        type: Sequelize.CHAR(36),
+        type: Sequelize.STRING,
         allowNull: false,
       },
       phone: {
