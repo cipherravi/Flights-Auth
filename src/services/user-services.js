@@ -2,7 +2,7 @@ const { UserRepository } = require("../repositories");
 const { ServerConfig } = require("../config");
 const { getLogger } = require("../config");
 const logger = getLogger(__filename);
-const { SECRET_KEY } = ServerConfig;
+const { SECRET_KEY, SALT_ROUNDS, EXPIRES_IN } = ServerConfig;
 const AppError = require("../utils/AppError");
 const { StatusCodes } = require("http-status-codes");
 const bcrypt = require("bcrypt");
@@ -12,7 +12,7 @@ const userRepository = new UserRepository();
 
 async function signup(fullName, email, phone, password) {
   try {
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
     const createdUser = await userRepository.create({
       fullName,
@@ -85,7 +85,9 @@ async function login(phone, email, password) {
       issuedAt: new Date(),
     };
 
-    const token = await jwt.sign(payload, SECRET_KEY, { expiresIn: "7d" });
+    const token = await jwt.sign(payload, SECRET_KEY, {
+      expiresIn: EXPIRES_IN,
+    });
 
     return token;
   } catch (error) {
@@ -100,4 +102,34 @@ async function login(phone, email, password) {
   }
 }
 
-module.exports = { signup, login };
+async function updateuser(userId, updateData) {
+  try {
+    const findUser = await userRepository.get(userId);
+
+    const oneTimeAllowed = [
+      "passportNumber",
+      "dateOfBirth",
+      "country",
+      "gender",
+    ];
+
+    for (const key in updateData) {
+      if (oneTimeAllowed.includes(key)) {
+        if (findUser[key] !== null && findUser[key] !== undefined) {
+          throw new AppError(
+            `${key} can only be set once , please contact customer care to change`,
+            StatusCodes.BAD_REQUEST
+          );
+        }
+      }
+    }
+
+    const updateUser = await userRepository.update(userId, updateData);
+
+    return updateUser;
+  } catch (error) {
+    throw error;
+  }
+}
+
+module.exports = { signup, login, updateuser };
