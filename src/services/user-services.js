@@ -1,8 +1,8 @@
 const { UserRepository } = require("../repositories");
-const { ServerConfig } = require("../config");
+const { serverConfig } = require("../config");
 const { getLogger } = require("../config");
 const logger = getLogger(__filename);
-const { SECRET_KEY, SALT_ROUNDS, EXPIRES_IN } = ServerConfig;
+const { SECRET_KEY, SALT_ROUNDS, EXPIRES_IN } = serverConfig;
 const AppError = require("../utils/AppError");
 const { StatusCodes } = require("http-status-codes");
 const bcrypt = require("bcrypt");
@@ -12,7 +12,7 @@ const userRepository = new UserRepository();
 
 async function signup(fullName, email, phone, password) {
   try {
-    const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+    const passwordHash = await bcrypt.hash(password, +SALT_ROUNDS);
 
     const createdUser = await userRepository.create({
       fullName,

@@ -1,12 +1,12 @@
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
 const { UserService } = require("../services");
 const { ErrorResponse, SuccessResponse } = require("../utils/common");
 const { getLogger } = require("../config");
 const logger = getLogger(__filename);
 const AppError = require("../utils/AppError");
 const { StatusCodes } = require("http-status-codes");
-const { ServerConfig } = require("../config");
-const { SECRET_KEY } = ServerConfig;
+// const { serverConfig } = require("../config");
+// const {} = ServerConfig;
 
 async function signup(req, res) {
   const { fullName, email, phone, password } = req.body;
@@ -46,6 +46,13 @@ async function login(req, res) {
     if (!response) {
       throw new AppError("Failed to login ", StatusCodes.INTERNAL_SERVER_ERROR);
     }
+
+    res.cookie("token", response, {
+      httpOnly: true,
+      secure: false, // Use true in production with HTTPS
+      sameSite: "Strict",
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully logged in";
     return res.status(StatusCodes.OK).json(SuccessResponse);
@@ -68,15 +75,7 @@ async function login(req, res) {
 
 async function updateuser(req, res) {
   try {
-    const token = req.headers["x-access-token"];
-    if (!token) {
-      throw new AppError("Token not found", StatusCodes.BAD_REQUEST);
-    }
-    const isAuthenticated = await jwt.verify(token, SECRET_KEY);
-    if (!isAuthenticated) {
-      throw new AppError("Unauthorised user", StatusCodes.UNAUTHORIZED);
-    }
-    const userId = isAuthenticated.id;
+    const userId = req.user.id;
 
     const allowedFields = [
       "fullName",

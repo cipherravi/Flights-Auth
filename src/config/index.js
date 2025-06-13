@@ -1,6 +1,6 @@
-const ServerConfig = require("./server-config");
+const serverConfig = require("./server-config");
 const getLogger = require("./logger-config");
 module.exports = {
-  ServerConfig,
+  serverConfig,
   getLogger,
 };
