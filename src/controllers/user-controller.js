@@ -73,7 +73,7 @@ async function login(req, res) {
   }
 }
 
-async function updateuser(req, res) {
+async function updateUser(req, res) {
   try {
     const userId = req.user.id;
 
@@ -95,7 +95,7 @@ async function updateuser(req, res) {
       }
     }
 
-    const response = await UserService.updateuser(userId, updateData);
+    const response = await UserService.updateUser(userId, updateData);
 
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully updated user";
@@ -117,4 +117,34 @@ async function updateuser(req, res) {
   }
 }
 
-module.exports = { signup, login, updateuser };
+async function getProfile(req, res) {
+  try {
+    const { id } = req.params;
+    const response = await UserService.getProfile(id);
+    if (!response) {
+      throw new AppError(
+        "Profile not Found , please check details",
+        StatusCodes.NOT_FOUND
+      );
+    }
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched user Profile";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    logger.error(error.stack || error.message);
+    const statusCode =
+      error instanceof AppError
+        ? error.statusCode
+        : StatusCodes.INTERNAL_SERVER_ERROR;
+    const message =
+      error instanceof AppError
+        ? error.message
+        : "Something went wrong while fetching profile ";
+    ErrorResponse.error = error;
+    ErrorResponse.message = message;
+
+    return res.status(statusCode).json(ErrorResponse);
+  }
+}
+
+module.exports = { signup, login, updateUser, getProfile };

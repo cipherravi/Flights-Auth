@@ -102,7 +102,7 @@ async function login(phone, email, password) {
   }
 }
 
-async function updateuser(userId, updateData) {
+async function updateUser(userId, updateData) {
   try {
     const findUser = await userRepository.get(userId);
 
@@ -132,4 +132,16 @@ async function updateuser(userId, updateData) {
   }
 }
 
-module.exports = { signup, login, updateuser };
+async function getProfile(id) {
+  try {
+    const user = await userRepository.get(id);
+    if (!user) {
+      throw new AppError("User not Found", StatusCodes.NOT_FOUND);
+    }
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
+module.exports = { signup, login, updateUser, getProfile };
