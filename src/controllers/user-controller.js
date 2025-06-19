@@ -89,6 +89,10 @@ async function updateUser(req, res) {
     ];
     const updateData = {};
 
+    if (req.body == undefined) {
+      throw new AppError("Empty fields ", StatusCodes.BAD_REQUEST);
+    }
+
     for (const key of allowedFields) {
       if (req.body[key] !== undefined) {
         updateData[key] = req.body[key];
@@ -119,7 +123,7 @@ async function updateUser(req, res) {
 
 async function getProfile(req, res) {
   try {
-    const { id } = req.params;
+    const { id } = req.user;
     const response = await UserService.getProfile(id);
     if (!response) {
       throw new AppError(
